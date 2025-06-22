@@ -20,11 +20,11 @@ Built for data nerds, bettors, and football fanatics who want to outsmart the bo
 
 PitchPredictor/
 ├── data/ # Raw & processed datasets
-│ └── fixtures.csv
+│   └── fixtures.csv
 ├── scraper/ # Web scraping scripts
-│ └── fetch_fixtures.py
+│   └── fetch_fixtures.py
 ├── predictor/ # Model training & prediction scripts
-│ └── train_model.py
+│   └── train_model.py
 ├── notebooks/ # Exploratory notebooks
 ├── utils/ # Helper functions
 ├── .gitignore

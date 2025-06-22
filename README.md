@@ -16,24 +16,6 @@ Built for data nerds, bettors, and football fanatics who want to outsmart the bo
 
 ---
 
-## 📁 Folder Structure
-
-PitchPredictor/
-├── data/ # Raw & processed datasets
-│   └── fixtures.csv
-├── scraper/ # Web scraping scripts
-│   └── fetch_fixtures.py
-├── predictor/ # Model training & prediction scripts
-│   └── train_model.py
-├── notebooks/ # Exploratory notebooks
-├── utils/ # Helper functions
-├── .gitignore
-├── requirements.txt
-└── README.md
-
-
----
-
 ## Setup Instructions
 
 ```bash
@@ -49,4 +31,4 @@ source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 
 # Run the scraper
-python scraper/fetch_fixtures.py
+python scraper/pitch.py

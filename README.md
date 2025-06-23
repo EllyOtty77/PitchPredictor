@@ -31,4 +31,4 @@ source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 
 # Run the scraper
-python scraper/pitch.py
+python pitch.py

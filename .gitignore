@@ -1,5 +1,15 @@
+# Ignore python bytecode files
 *.pyc
 __pycache__/
+
+# Ignore env file
 .env
+
+# Ignore virtual environment
 venv/
+
+# Ignore database
 data/soccermatches.db
+
+# Ignore Jupyter Notebook checkpoints
+.ipynb_checkpoints/

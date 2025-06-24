@@ -2,6 +2,12 @@
 import sqlite3
 import pandas as pd
 from eco import *
+import sys
+import os
+# Add the app directory to the Python path
+sys.path.append(os.path.join(os.path.dirname(__file__), 'app'))
+from bot import send_predictions
+
 from pred import generate_predictions
 
 # database path
@@ -35,6 +41,10 @@ if date_input == '1':
         print("✅ Upcoming matches saved to database.")
         # Trigger predictions after save
         generate_predictions()
+        
+        # Send predictions to Telegram
+        print("\n📡 Sending predictions to your Telegram bot...")
+        send_predictions()
     else:
         print("❌ Operation cancelled. No changes made.")
 

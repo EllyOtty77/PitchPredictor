@@ -60,5 +60,3 @@ def send_predictions():
             print("❌ Failed to send Telegram message:", res.text)
     except Exception as e:
         print("🚨 Error in send_predictions():", e)
-
-send_predictions()

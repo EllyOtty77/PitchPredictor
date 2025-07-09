@@ -9,6 +9,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'app'))
 from bot import send_predictions
 
 from pred import generate_predictions
+from pred import update_prediction_results
 
 # database path
 DB_PATH = os.getenv('DB_PATH')
@@ -62,6 +63,9 @@ elif date_input == '2':
             df.to_sql('footballresults', conn, if_exists='append', index=False)
         print("✅ Match results saved to database.")
         
+         # Call the update function after results are saved
+        print("\n🔍 Updating prediction success values...")
+        update_prediction_results()
     else:
         print("❌ Operation cancelled. No changes made.")
 

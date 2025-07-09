@@ -7,7 +7,7 @@ from dateutil.parser import parse
 import os
 import time
 import sqlite3
-from dotenv import load_dotenv  # <-- Add this
+from dotenv import load_dotenv  
 
 # Load environment variables
 load_dotenv()   

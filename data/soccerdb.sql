@@ -62,3 +62,10 @@ CREATE TABLE "Predictions" (
     "Prediction" TEXT,
     "Success" INTEGER CHECK("Success" IN (0, 1))
 )
+
+-- Create table for logging updates to predictions
+CREATE TABLE IF NOT EXISTS PredictionUpdateLog (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    last_updated_id INTEGER,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

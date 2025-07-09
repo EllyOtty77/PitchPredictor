@@ -79,3 +79,86 @@ def generate_predictions():
     print(f" Updated database with {len(pred_df)} matches")
 
     return pred_df, total_odd
+    
+
+# Function to automatically update prediction results
+def update_prediction_results():
+    conn = sqlite3.connect(DB_PATH)
+
+    try:
+        # Step 1: Get last updated prediction ID
+        last_id_result = conn.execute("SELECT last_updated_id FROM PredictionUpdateLog ORDER BY id DESC LIMIT 1").fetchone()
+        last_updated_id = last_id_result[0] if last_id_result else 0
+
+        # Step 2: Get new predictions
+        preds_sql = f"""
+            SELECT *
+            FROM Predictions
+            WHERE id > {last_updated_id}
+            ORDER BY id ASC
+        """
+        preds_df = pd.read_sql(preds_sql, conn)
+
+        # Step 3: Load football results
+        results_df = pd.read_sql("SELECT * FROM footballresults", conn)
+
+        # Step 4: Process and compute total goals
+        results_df["Total Goals"] = results_df["Score"].apply(
+            lambda x: sum(map(int, x.split(" - "))) if isinstance(x, str) and " - " in x else None
+        )
+
+        # Step 5: Loop and evaluate prediction correctness
+        updates = []
+        for _, pred in preds_df.iterrows():
+            home = pred["Home Team"]
+            away = pred["Away Team"]
+            match_date = pred["Match Date"]
+            prediction = pred["Prediction"]
+            pred_id = pred["id"]
+
+            # Try match
+            match = results_df[
+                (results_df["Home Team"] == home) &
+                (results_df["Away Team"] == away) &
+                (results_df["Match Date"] == match_date)
+            ]
+
+            if not match.empty:
+                total_goals = match["Total Goals"].values[0]
+                actual_winner = match["Result"].iloc[0]
+
+                success = 0
+                if "Over" in prediction:
+                    limit = float(prediction.split(" ")[1])
+                    if total_goals > limit:
+                        success = 1
+                elif prediction == "Home" and actual_winner == "1":
+                    success = 1
+                elif prediction == "Away" and actual_winner == "2":
+                    success = 1
+                elif prediction == "Draw" and actual_winner == "X":
+                    success = 1
+
+                updates.append((success, pred_id))
+
+        # Step 6: Update Database
+        for success, pred_id in updates:
+            conn.execute("UPDATE Predictions SET Success = ? WHERE id = ?", (success, pred_id))
+            print(f"Updated prediction ID {pred_id} ➝ Success = {success}")
+
+        conn.commit()
+        print("✅ Prediction results updated.")
+        
+        # Step 7: Log the last updated ID
+        if updates:
+            last_updated_id = updates[-1][1]
+            conn.execute("INSERT INTO PredictionUpdateLog (last_updated_id) VALUES (?)", (last_updated_id,))
+            conn.commit()
+            print(f"\n📘 Logged last updated ID: {last_updated_id}")
+        else:
+            print("🟡 No new predictions to update.")
+            
+    except Exception as e:
+        print(f"❌ Error occurred: {e}")
+    finally:
+        conn.close()

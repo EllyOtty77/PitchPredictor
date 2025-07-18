@@ -250,7 +250,7 @@ def scrape_data(dates):
                 
             scores.append(score)
             
-            if ' - ' in score:
+            if isinstance(score, str) and ' - ' in score:
                 goals = list(map(int, score.split(' - ')))
         
                 # Calculate the difference between the first and second goals
@@ -267,41 +267,51 @@ def scrape_data(dates):
                 result.append('')   
             
             # Extract league
-            league = soup.find('div', {'class':'leagueslink'}).text
+            league_tag = soup.find('div', {'class':'leagueslink'})
+            league = league_tag.text.strip() if league_tag else "Unknown"
             leagues.append(league)
         
             # Extract power rankings and team to score stats
             divs = soup.find_all('div', {'class': 'LeagueStandings mb-3 card'})
+            if divs:
+                power_div = divs[0]
+                tr_items = power_div.find_all('tr')
+                h_tr = tr_items[1]
+                h_tds = h_tr.find_all('td')
+                a_tr = tr_items[2]
+                a_tds = a_tr.find_all('td')
+
+                # Power rankings
+                h_power = float(h_tds[-1].text.strip())
+                a_power = float(a_tds[-1].text.strip())
+
+                home_power.append(h_power)
+                away_power.append(a_power)
+
+                # Both teams to score
+                h_btts = int(h_tds[-2].text.strip().replace('%', ''))
+                a_btts = int(a_tds[-2].text.strip().replace('%', ''))
+
+                home_btts.append(h_btts)
+                away_btts.append(a_btts)
+            else:
+                print(f"⚠️ No LeagueStandings card found for match at {url}")
+                home_power.append(None)
+                away_power.append(None)
+                home_btts.append(None)
+                away_btts.append(None)
         
-            power_div = divs[0]
-            tr_items = power_div.find_all('tr')
-            h_tr = tr_items[1]
-            h_tds = h_tr.find_all('td')
-            a_tr = tr_items[2]
-            a_tds = a_tr.find_all('td')
-        
-            # Power rankings
-            h_power = float(h_tds[-1].text.strip())
-            a_power = float(a_tds[-1].text.strip())
-        
-            home_power.append(h_power)
-            away_power.append(a_power)
-        
-            # Both teams to score
-            h_btts = int(h_tds[-2].text.strip().replace('%', ''))
-            a_btts = int(a_tds[-2].text.strip().replace('%', ''))
-        
-            home_btts.append(h_btts)
-            away_btts.append(a_btts)
-            
-        
-            # Match details
-        
+
             # Odds
             odds = soup.find_all('div', {'class': 'oddgame text-center'})
-            h_odd  = odds[0].text.strip()
-            x_odd = odds[1].text.strip()
-            a_odd = odds[2].text.strip()
+            if len(odds) >= 3:
+                h_odd = odds[0].text.strip()
+                x_odd = odds[1].text.strip()
+                a_odd = odds[2].text.strip()
+            else:
+                print(f"⚠️ Odds not found or incomplete for match at {url}")
+                h_odd = x_odd = a_odd = None
+
         
             home_odds.append(h_odd)
             draw_odds.append(x_odd)
@@ -309,7 +319,11 @@ def scrape_data(dates):
         
             # Game average stats
             game_stats = soup.find_all('div', {'class': 'card mb-4 detailscard'})
+            if not game_stats:
+                print(f"⚠️ No detailscard stats found for match at {url}")
+                continue   
             game_div = game_stats[-1]
+
             trs = game_div.find_all('tr')
         
             for index, tr in enumerate(trs):
@@ -426,7 +440,7 @@ def scrape_data(dates):
                 away_gd.append(None)
             
         
-        data = {
+        match_data = {
             'Home Team': home_teams,
             'Away Team': away_teams,
             'Match Dates': match_dates,
@@ -453,9 +467,9 @@ def scrape_data(dates):
             'AwayPower': away_power,
             }
         
-        day_df = pd.DataFrame(data)
+        day_df = pd.DataFrame(match_data)
         time.sleep(3)
-        
+
         # Append to the all_data DataFrame
         all_data = pd.concat([all_data, day_df], ignore_index=True)
     

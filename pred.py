@@ -30,10 +30,14 @@ def generate_predictions():
     conn.close()
 
     # --- Over 1.5 Goals Prediction ---
-    over_df = df[((df['H1.5'] > 90) | (df['A1.5'] > 90)) & (df['Powerdiff'] >= 30)].copy()
+    over_df = df[((df['H1.5'] > 90) & (df['H2.5'] >= 60) 
+                & (df['A2.5'] >= 60) & (df['Powerdiff'] >= 20))
+                | ((df['A1.5'] > 90) & (df['Powerdiff'] >= 20) 
+                & (df['A2.5'] >= 60)) ].copy()
+    
     over_df['Prediction'] = 'Over 1.5'
     over_df['Odd'] = 1.23
-
+    
     # --- Home Team Win Prediction Based on Rank/Form ---
     pos_home = df[
         (df['Powerdiff'] > 50) &
